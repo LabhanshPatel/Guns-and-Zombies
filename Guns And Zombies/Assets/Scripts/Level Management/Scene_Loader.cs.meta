@@ -1,0 +1,95 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class Scene_Loader : MonoBehaviour
+{
+    public static int current_scene;
+
+    [SerializeField] Money_Manager money_manager;
+    //  private Animator transition_animator;
+    private Animation transition_animation;
+    private int starting_money;
+
+
+    private void Awake()
+    {
+        current_scene = SceneManager.GetActiveScene().buildIndex;
+
+        Static_Fields.stop_adding_money = false;
+    }
+    void Start() {
+
+        if(current_scene != 0)
+        transition_animation = GameObject.Find("Scene Transition").transform.Find("Canvas").transform.Find("Background").GetComponent<Animation>();
+       
+
+        if(current_scene != 0 && current_scene!=1)
+            money_manager = FindObjectOfType<Money_Manager>().GetComponent<Money_Manager>();
+
+        starting_money = Static_Fields.money;
+
+        if (current_scene == 0) {        
+           StartCoroutine(Load_startscene());
+
+        }
+    }
+
+ 
+
+    public void Load_GameOver_Scene()
+    {
+        SceneManager.LoadScene(6);
+    }
+  
+    public void Load_Level1_Scene()
+    {
+        Static_Fields.money = 0;
+        money_manager.text.text = Static_Fields.money.ToString();
+        transition_animation.Play("scene_transition");
+        StartCoroutine(Wait_for_button_response(2));
+    }
+
+    public void Load_CurrentLevel_Scene()
+    {
+        Static_Fields.money = starting_money;
+        money_manager.text.text = Static_Fields.money.ToString();
+        transition_animation.Play("scene_transition");
+        StartCoroutine(Wait_for_button_response(SceneManager.GetActiveScene().buildIndex));
+    }
+
+    public void Load_Menu_scene()
+    {
+        transition_animation.Play("scene_transition");
+        StartCoroutine(Wait_for_button_response(1));        
+    }
+
+
+
+    public void On_Click_Start_Button() {
+        transition_animation.Play("scene_transition");      
+        StartCoroutine(Wait_for_button_response(2));
+    }
+
+    public void Load_Next_Level() {
+        transition_animation.Play("scene_transition");    
+        StartCoroutine(Wait_for_button_response(current_scene + 1));
+    }
+    public void On_click_Quit_Button() {     
+        Application.Quit();
+    }
+
+    IEnumerator Load_startscene() {    
+        yield return new WaitForSeconds(5f);
+        SceneManager.LoadScene(1);
+    }
+
+    IEnumerator Wait_for_button_response(int index)
+    {
+        yield return new WaitForSeconds(1f);      
+        SceneManager.LoadScene(index);  
+    }
+
+  
+}
